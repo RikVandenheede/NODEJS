@@ -1,11 +1,12 @@
 const path = require("path"); // core node module
 const express = require("express"); // express is een functie, gebruikt om een applicatie aan te maken
 const hbs = require("hbs");
+const geoCode = require("./utils/geoCode");
 
 // nodemon src/app.js -e js,hbs // laat weten dat deze ook moeten geupdate worden door de e flag
 
-console.log(__dirname); // geeft de route van de map waar deze file in zit terug
-console.log(path.join(__dirname, "../public")); // geeft het path naar de public map // kijk lijn 10
+// console.log(__dirname); // geeft de route van de map waar deze file in zit terug
+// console.log(path.join(__dirname, "../public")); // geeft het path naar de public map // kijk lijn 10
 
 const app = express(); // genereert een express app, om de server te configureren passen we methodes toe op de app
 // hieronder zeggen wat onze express app moet doen
@@ -48,9 +49,37 @@ app.get("/about", (req, res) => {
 })
 
 app.get("/weather", (req, res) => {
+    console.log(req.query.address);
+    if(!req.query.address){
+        return res.send({
+            error: "Geef een locatie in"
+        })
+    }
+    geoCode(req.query.address, (error, {location, latidude, longitude}) => {
+        if(!error) {
+            return res.send({
+                location,
+                latidude,
+                longitude
+            })
+        }
+    })
     res.send({
-        location: "Binkom",
-        degrees: 12
+        forecast: "It's snowing",
+        degree: 0,
+        location: req.query.address
+    })
+})
+
+app.get("/products", (req, res) => {
+    if(!req.query.search) { // doet deze if als er GEEN searsch query is
+        return res.send({ // door return stopt de functie en verzend hij geen 2de response.
+            error: "You must provide a search term"
+        })
+    }
+    console.log(req.query.search);
+    res.send({
+        products: []
     })
 })
 
