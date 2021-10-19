@@ -19,6 +19,8 @@ const geoCode = (address, callback) => {
     })
 }
 
+const test = () => {}
+
 module.exports = {
-    geoCode
+    geoCode, test
 }
