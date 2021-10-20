@@ -1,7 +1,8 @@
 const path = require("path"); // core node module
 const express = require("express"); // express is een functie, gebruikt om een applicatie aan te maken
 const hbs = require("hbs");
-const utils = require("./utils/geoCode");
+const geoCode = require("./utils/geoCode");
+const forecast = require("./utils/forecast");
 
 // nodemon src/app.js -e js,hbs // laat weten dat deze ook moeten geupdate worden door de e flag
 
@@ -49,25 +50,26 @@ app.get("/about", (req, res) => {
 })
 
 app.get("/weather", (req, res) => {
-    console.log(req.query.address);
+    console.log(req.query);
     if(!req.query.address){
         return res.send({
             error: "Geef een locatie in"
         })
     }
-    utils.geoCode(req.query.address, (error, {location, latidude, longitude}) => {
+    geoCode(req.query.address, (error, {latitude, longitude, location} = {}) => {
         if(!error) {
-            return res.send({
-                location,
-                latidude,
-                longitude
+            forecast(latitude, longitude, (error, forecast) => {
+                if(!error) {
+                    res.send({
+                        forecast,
+                        location,
+                        address: req.query.address
+                    })
+                }
             })
+        }else {
+            return res.send(error);
         }
-    })
-    res.send({
-        forecast: "It's snowing",
-        degree: 0,
-        location: req.query.address
     })
 })
 
